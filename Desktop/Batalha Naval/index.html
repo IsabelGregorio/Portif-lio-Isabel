@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-Br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viemport" content="width=device, initial-scale=1.0">
+    <title>Batalha Naval</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            display: flex;
+            flex-direction:column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #89b4fa;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+
+         }
+
+         /* Tabuleiro */
+         .grid{ 
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            grid-template-rows: repeat(5, 60px);
+            gap: 8px;
+            background-color: #313244;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 4);
+         }
+
+         /* Células da grade */
+         .cell {
+            width: 60px;
+            height: 60px;
+            background-color: #45475a;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s, transform 0.1s;
+
+         }
+
+         .cell.hit{
+            background-color: #f38ba8;
+            cursor: default;
+         }
+
+         .btn-restart {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #a6e3a1
+            color #11111b;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+         }
+
+         .btn-restart:hover {
+            background-color: #94e2d5;
+         }
+    </style>
+</head>
+<body>
+    <button id="btnTiro" onclick="darTiro">Dar tiro</button>
+    <h1>== BATALHA NAVAL ==</h1>
+    <div class="status" id="status">Tentativas restantes: <span id="tentativas">10</span></div>
+
+    <!-- Tabuleiro 5x5-->
+     <div class="grid" id="tabuleiro"></div>
+
+     <button class="btn-restart" onclick="iniciarJogo()">Reiniciar Jogo</button>
+
+     <script>
+        const TAMANHO = 5;
+        let tentativas = 10;
+        let navioPosicoes = [];
+        let naviosRestantes = 2; //submarino ocupa 2 casas
+        let jogoAcabou = false;
+
+        function iniciarJogo() {
+            tentativas = 10;
+            naviosRestantes = 2;
+            jogoAcabou = false;
+            document.getElementById('tentativas').textContent = tentativas;
+            document.getElementById('status').innerHTML = 'Tentativas restantes: <span id="tentativas">10</span';
+            document.getElementById('status').style.color = '#cdd6f4';
+
+
+            navioPosicoes = gerarNavio();
+
+            const tabuleiro = document.getElementById('tabuleiro');
+            tabuleiro.innerHTML = '';
+
+            for (let r = 0; r < TAMANHO; r++) {
+                for (let c = 0; c <TAMANHO; c++){
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+
+            cell.addEventListener('click', darTiro);
+                    tabuleiro.appendChild(cell);
+                    
+                }
+
+
+                
+            }    
+            
+        }
+
+        function gerarNavio() {
+            const posicoes = [];
+            const horizontal = Math.random() <0.5;
+            let r, c;
+
+            if (horizontal){
+                r = Math.floor(Math.random() *TAMANHO);
+                c = Math.floor(Math.random() * (TAMANHO - 1));
+                navioPosicoes.push(`${r}-${c}`, `${r}-${c + 1}`);
+
+            } else {
+                r = Math.floor(Math.random() *(TAMANHO - 1));
+                c = Math.floor(Math.random() *TAMANHO);
+                navioPosicoes.push(`${r}-${c}`, `${r + 1}-${c}`);
+            }  
+            return posicoes;      
+        } 
+
+        function darTiro(event) {
+            if (jogoAcabou) return;
+
+            const cell = event.target;
+            const r = cell.dataset.row
+            const c = cell.dataset.col;
+            const poskey = `${r}-${c}`;
+
+            if (cell.classList.contains('hit') || cell.classList.contains('miss')) return;
+
+            if (navioPosicoes.includes(poskey)) {
+                cell.classList.add('hit');
+                cell.textContent = '💥';
+                naviosRestantes--;
+
+                if (naviosRestantes === 0) {
+                    document.getElementById('status').textContent = '🎉 PARABENS! Você destruiu a frota inimiga';
+                    document.getElementById('status').style.color = '#a6e3a1';
+                    jogoAcabou = true;
+                    return;
+
+                }
+
+            }else{
+                cell.classList.add('miss');
+                cell.textContent = '🌊';
+                tentativas--;
+                document.getElementById('tentativas').textContent = tentativas;
+
+            }
+
+            if (tentativas === 0) {
+                document.getElementById('status').textContent = '☠️ Game Over! Suas tentativas acabaram.';
+                document.getElementById('status').style.color = '#f38ba8';
+                jogoAcabou = true;
+
+            }
+
+
+
+
+        }
+
+        iniciarJogo();
+     </script>
+</body>
+</html>
+            
+        
+            
+    
